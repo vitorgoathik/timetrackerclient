@@ -71,7 +71,7 @@ delete(item){
                 </Row>
                 <Row className="show-grid"></Row>
                 <Row className="show-grid">
-                <Col xs={8} xsPull={2}  xsPush={2}>
+                <Col xs={12} >
                     <Table striped bordered condensed hover>
                         <thead>
                             <tr>

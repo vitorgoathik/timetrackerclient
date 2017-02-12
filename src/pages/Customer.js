@@ -70,15 +70,15 @@ delete(item){
                 </Row>
                 <Row className="show-grid"></Row>
                 <Row className="show-grid">
-                <Col xs={8} xsPull={2}  xsPush={2}>
+                <Col xs={12} >
                     <Table striped bordered condensed hover>
                         <thead>
                             <tr>
                                 <th width="25%">Customer</th>
                                 <th width="20%">E-mail</th>
                                 <th width="10%">Phone</th>
-                                <th width="30%">Address</th>
-                                <th width="15%">Action</th>
+                                <th width="25%">Address</th>
+                                <th width="20%">Action</th>
                             </tr>
                         </thead>
                         <tbody>

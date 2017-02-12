@@ -3,7 +3,6 @@ import {Glyphicon, InputGroup, Modal, ListGroup, ListGroupItem, Form, Row, PageH
 import {browserHistory, hashHistory, Link} from 'react-router';
 import ToggleDisplay from 'react-toggle-display';
 import DayPicker, { DateUtils } from "react-day-picker";
-import Moment from 'react-moment';
 const url = param => `http://localhost/TimeTracker/api/TimeRecord`
 const urlProject = param => `http://localhost/TimeTracker/api/Project`
 const urlUser = param => `http://localhost/TimeTracker/api/User`
