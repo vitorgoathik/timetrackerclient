@@ -17,21 +17,21 @@ class TimeRecordNew extends Component {
 
 constructor(props){
     super(props)
-debugger;
-    this.state = this.setInitialState();
+
+    this.state = this.setInitialState(false);
     this._onChange = this._onChange.bind(this);
     this._onSubmit = this._onSubmit.bind(this); 
     this.checkTodayChanged = this.checkTodayChanged.bind(this);
     this.checkNowChanged = this.checkNowChanged.bind(this);
 }
    
-   setInitialState()
+   setInitialState(successState)
    {
         var moment = require('moment')
         var today =  moment().format('DD/MM/YYYY');
         var todayJS =  moment().toDate();
        return { 
-        requestFailed: false, success: false, loading: false,  UserID: "", ProjectID: "", StartTime: "", EndTime: "",
+        requestFailed: false, success: successState, loading: false,  UserID: "", ProjectID: "", StartTime: "", EndTime: "",
         CustomerID: "", Comments: "", StartDateDisabled: true, EndDateDisabled: true, 
         StartDate: today, EndDate: today, StartDateCalendar: todayJS, EndDateCalendar: todayJS,
         showStartDateModal: false,  showEndDateModal: false,  StartDateCheckToday: true, EndDateCheckToday: true, EndDateCheckTodayDisabled: false,
@@ -80,7 +80,7 @@ getProjectsCombo(){
   
   _onSubmit (e) {
     e.preventDefault();
-    debugger;
+    
     this.setState({loading: true});
     var errors = this._validate();
     if(Object.keys(errors).length != 0) {
@@ -112,8 +112,8 @@ getProjectsCombo(){
     })
     .then(d => d.json())
     .then(d => {}, (d) => {
-        this.setState({success: d.ok})
-        this.setState(this.setInitialState())
+        debugger;
+        this.setState(this.setInitialState(true))
     })
 this.setState({loading: false});
   } 
@@ -166,12 +166,12 @@ this.setState({loading: false});
     return errors;
   }
   getJsDate(date){
-      debugger;
+      
       var moment = require("moment");
       return moment(date,"DD/MM/YYYY").toDate()
   }
   getJsDateTime(date){
-      debugger;
+      
       var moment = require("moment");
       return moment(date,"DD/MM/YYYY HH:mm").toDate()
   }
@@ -189,7 +189,7 @@ this.setState({loading: false});
        this.handleDayClick(e, "EndDate", day, { selected, disabled })
    }
    handleDayClick(e, stateName, day, { selected, disabled }) {
-       debugger;
+       
     if (disabled) {
       return;
     }
@@ -208,7 +208,7 @@ this.setState({loading: false});
 
   checkTodayChanged (e)
   {
-      debugger;
+      
     var moment = require("moment")
     var state = {};
     state[e.target.name + "Disabled"] =  e.target.checked;
@@ -219,7 +219,7 @@ this.setState({loading: false});
   }
   checkNowChanged (e)
   {
-      debugger;
+      
     var moment = require("moment")
         var today =  moment().format('DD/MM/YYYY');
     
