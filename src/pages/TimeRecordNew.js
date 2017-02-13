@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Glyphicon, InputGroup, Modal, ListGroup, ListGroupItem, Form, Row, PageHeader, ControlLabel, FormControl, FormGroup, Col, Button } from 'react-bootstrap'
+import '../App.css';
+import {Checkbox, Glyphicon, InputGroup, Modal, ListGroup, ListGroupItem, Form, Row, PageHeader, ControlLabel, FormControl, FormGroup, Col, Button } from 'react-bootstrap'
 import {browserHistory, hashHistory, Link} from 'react-router';
 import ToggleDisplay from 'react-toggle-display';
 import DayPicker, { DateUtils } from "react-day-picker";
@@ -16,20 +17,27 @@ class TimeRecordNew extends Component {
 
 constructor(props){
     super(props)
-
-    
-    this.state = { 
-        requestFailed: false, success: false, loading: false,  UserID: "", ProjectID: "", 
-        CustomerID: "", Comment: "",
-        StartDate: "", StartDateCalendar: null, EndDateCalendar: null,
-        showStartDateModal: false,  showEndDateModal: false, 
-    errors: {}
-    }
+debugger;
+    this.state = this.setInitialState();
     this._onChange = this._onChange.bind(this);
     this._onSubmit = this._onSubmit.bind(this); 
-    
+    this.checkTodayChanged = this.checkTodayChanged.bind(this);
+    this.checkNowChanged = this.checkNowChanged.bind(this);
 }
    
+   setInitialState()
+   {
+        var moment = require('moment')
+        var today =  moment().format('DD/MM/YYYY');
+        var todayJS =  moment().toDate();
+       return { 
+        requestFailed: false, success: false, loading: false,  UserID: "", ProjectID: "", StartTime: "", EndTime: "",
+        CustomerID: "", Comments: "", StartDateDisabled: true, EndDateDisabled: true, 
+        StartDate: today, EndDate: today, StartDateCalendar: todayJS, EndDateCalendar: todayJS,
+        showStartDateModal: false,  showEndDateModal: false,  StartDateCheckToday: true, EndDateCheckToday: true, EndDateCheckTodayDisabled: false,
+        errors:{}
+       }
+   }
 componentDidMount()
 { 
     this.getUsersCombo()
@@ -91,9 +99,9 @@ getProjectsCombo(){
     body: JSON.stringify({
         ProjectID: this.state.ProjectID,
         UserID: this.state.UserID,
-        Start: this.state.StartDate,
-        End: this.state.EndDate,
-        Comment: this.state.Comment
+        Start: this.getJsDateTime(this.state.StartDate+ " " +this.state.StartTime),
+        End: this.getJsDateTime(this.state.EndDate + " " + this.state.EndTime),
+        Comments: this.state.Comments
     })
 }).then(response => {
         if(!response.ok)
@@ -104,7 +112,8 @@ getProjectsCombo(){
     })
     .then(d => d.json())
     .then(d => {}, (d) => {
-        this.setState({ success: d.ok,  Name: "", Email: "", Phone: "", Address: "", errors: {} })
+        this.setState({success: d.ok})
+        this.setState(this.setInitialState())
     })
 this.setState({loading: false});
   } 
@@ -121,13 +130,50 @@ this.setState({loading: false});
     if(this.state.ProjectID == "") {
       errors.ProjectID = "Project is required";
     }
+    if(!new RegExp(DateRegex).test(this.state.StartDate)) {
+      errors.StartDate = "Start Date is invalid. Valid format DD/MM/YYYY";
+    }
+    if(!new RegExp(DateRegex).test(this.state.EndDate)) {
+      errors.EndDate = "End Date is invalid. Valid format DD/MM/YYYY";
+    }
+    if(!new RegExp(TimeRegex).test(this.state.StartTime)) {
+      errors.StartTime = "Start Time is invalid. Valid format HH:MM (24H)";
+    }
+    if(!new RegExp(TimeRegex).test(this.state.EndTime)) {
+      errors.EndTime = "End Time is invalid. Valid format HH:MM (24H)";
+    }
     if(this.state.StartDate == "") {
       errors.StartDate = "Start Date is required";
     }
-    if(this.state.StartDate > this.state.EndDate) {
-      errors.StartDate = "Start Date cannot be after End Date";
+    if(this.state.EndDate == "") {
+      errors.StartDate = "End Date is required";
+    }
+    if(this.state.StartTime == "") {
+      errors.StartTime = "Start Time is required";
+    }
+    if(this.state.EndTime == "") {
+      errors.EndTime = "End Time is required";
+    }
+    if(this.getJsDate(this.state.StartDate) > this.getJsDate(this.state.EndDate)) {
+      errors.StartDate = "Start Date cannot be later than End Date";
+    }
+    if(this.state.StartDate == this.state.EndDate && 
+    (errors.StartTime == "" || errors.StartTime == undefined) && (errors.StartDate == "" || errors.StartDate == undefined) 
+    && (errors.EndTime == "" || errors.EndTime == undefined) && (errors.EndDate == "" || errors.EndDate == undefined)
+    && this.getJsDateTime(this.state.StartDate+ " " +this.state.StartTime) > this.getJsDateTime(this.state.EndDate + " " + this.state.EndTime)) {
+      errors.StartDate = "Start Time cannot be later than End Time when Dates are the same";
     }
     return errors;
+  }
+  getJsDate(date){
+      debugger;
+      var moment = require("moment");
+      return moment(date,"DD/MM/YYYY").toDate()
+  }
+  getJsDateTime(date){
+      debugger;
+      var moment = require("moment");
+      return moment(date,"DD/MM/YYYY HH:mm").toDate()
   }
   _formGroupClass (field) {
     var className = null;
@@ -152,16 +198,39 @@ this.setState({loading: false});
         state[stateName] =  null; 
     } else {
         var moment = require('moment')
-        state[stateName] =  moment(day).format('DD/MM/YYYY');
-        state[stateName + "Calendar"] =  day;
+        state[stateName] = moment(day).format('DD/MM/YYYY');
+        state[stateName + "Calendar"] = day;
     } 
     this.setState(state);
     this.setState({ showStartDateModal: false});
     this.setState({ showEndDateModal: false});
   }
+
+  checkTodayChanged (e)
+  {
+      debugger;
+    var moment = require("moment")
+    var state = {};
+    state[e.target.name + "Disabled"] =  e.target.checked;
+    state[e.target.name + "CheckToday"] =  e.target.checked;
+    state[e.target.name] = moment().format("DD/MM/YYYY");
+    state[e.target.name + "Calendar"] = moment().toDate();
+    this.setState(state);
+  }
+  checkNowChanged (e)
+  {
+      debugger;
+    var moment = require("moment")
+        var today =  moment().format('DD/MM/YYYY');
+    
+    this.setState({EndDateCheckTodayDisabled:e.target.checked, EndDateCheckToday: true,
+          EndTime: moment().format("HH:mm"), 
+          EndDateDisabled:e.target.checked, EndDate:today});
+  }
   render() { 
        let closeStartDateModal = () => this.setState({ showStartDateModal: false});
-       let closeEndDateModal = () => this.setState({ showEndDateModal: false});
+       let closeEndDateModal = () => this.setState({ showEndDateModal: false}); 
+
     if (!this.state.projectsCombo) {
         return <p>Loading Customers Select</p>
     }  
@@ -169,12 +238,11 @@ this.setState({loading: false});
         return <p>Loading Customers Select</p>
     }  
 
-
     return (
       <div  className="modal-container">
             <Row className="show-grid">
                     <Col xs={12}>
-                        <PageHeader>TimeRecord <small>new</small></PageHeader>
+                        <PageHeader>Time Record <small>new</small></PageHeader>
                     </Col>
                 </Row>
         <Form horizontal ref='TimeRecord_form' onSubmit={this._onSubmit}>
@@ -182,7 +250,7 @@ this.setState({loading: false});
                 <Col componentClass={ControlLabel} xs={2} xsOffset={2}>
                     User
                 </Col>
-                <Col xs={4}>   
+                <Col xs={5}>   
             <FormControl componentClass="select" 
             name="UserID" ref="UserID" type="UserID" 
             value={(this.state.UserID)} onChange={this._onChange} >
@@ -199,7 +267,7 @@ this.setState({loading: false});
                 <Col componentClass={ControlLabel} xs={2} xsOffset={2}>
                     Project
                 </Col>
-                <Col xs={4}>  
+                <Col xs={5}>  
                  
             <FormControl componentClass="select" 
             name="ProjectID" ref="ProjectID" type="ProjectID" 
@@ -216,18 +284,20 @@ this.setState({loading: false});
 
 
 
-            <FormGroup validationState={this._formGroupClass(this.state.errors.StartDate)}>
+            <FormGroup validationState={this._formGroupClass(this.state.errors.StartDate) || this._formGroupClass(this.state.errors.StartTime)}>
                 <Col componentClass={ControlLabel} xs={2} xsOffset={2}>
-                    Start Date
+                    Start Date/Time
                 </Col>
-                <Col xs={4}>
+                <Col xs={5}>
         
         <InputGroup> 
-        <FormControl onChange={this._onChange} id="StartDate" placeholder="Start Date" 
-                    value={this.state.StartDate} disabled="true"
-                    name="StartDate" ref="StartDate" type="text" />
         <InputGroup.Addon>
-        <Button 
+        <FormControl onChange={this._onChange} id="StartDate" placeholder="Start Date" 
+                    value={this.state.StartDate} disabled={this.state.StartDateDisabled}
+                    name="StartDate" ref="StartDate" type="text" />
+        </InputGroup.Addon>
+        <InputGroup.Addon>
+        <Button disabled={this.state.StartDateDisabled}
           bsSize="xsmall" onClick={() => this.setState({ showStartDateModal: true})}><Glyphicon 
           bsSize="xsmall" glyph="glyphicon glyphicon-calendar" /></Button>
           
@@ -253,28 +323,44 @@ this.setState({loading: false});
           </Modal.Footer>
         </Modal>
         </InputGroup.Addon>
+
+        <InputGroup.Addon>
+        <FormControl onChange={this._onChange} id="StartTime" placeholder="Time (24H)" 
+                    value={this.state.StartTime} 
+                    name="StartTime" ref="StartTime" type="text" />
+        </InputGroup.Addon>
+        <InputGroup.Addon>
+        <Checkbox checked={this.state.StartDateCheckToday} onClick={this.checkTodayChanged} name="StartDate">
+            Today
+        </Checkbox>
+        </InputGroup.Addon>
       </InputGroup>
                     <span className="help-block">{this.state.errors.StartDate}</span>
+                    <span className="help-block">{this.state.errors.StartTime}</span>
                 </Col> 
           </FormGroup>
 
 
 
-    <FormGroup>
+    <FormGroup validationState={this._formGroupClass(this.state.errors.EndDate) || this._formGroupClass(this.state.errors.EndTime)}>
                 <Col componentClass={ControlLabel} xs={2} xsOffset={2}>
-                    End Date
+                    End Date/Time
                 </Col>
-                <Col xs={4}>
+                <Col xs={5}>
         
         <InputGroup> 
-        <FormControl onChange={this._onChange} id="EndDate" placeholder="End Date" 
-                    value={this.state.EndDate} disabled="true"
-                    name="EndDate" ref="EndDate" type="text" />
         <InputGroup.Addon>
-        <Button 
+        <FormControl onChange={this._onChange} id="EndDate" placeholder="End Date" 
+                    value={this.state.EndDate} disabled={this.state.EndDateDisabled}
+                    name="EndDate" ref="EndDate" type="text" />
+        
+        </InputGroup.Addon>
+        <InputGroup.Addon>
+        <Button disabled={this.state.EndDateDisabled}
           bsSize="xsmall" onClick={() => this.setState({ showEndDateModal: true})}><Glyphicon 
-          bsSize="xsmall" glyph="glyphicon glyphicon-calendar" /></Button>
+           glyph="glyphicon glyphicon-calendar" /></Button>
           
+        </InputGroup.Addon>
         <Modal
           show={this.state.showEndDateModal}
           onHide={closeEndDateModal}
@@ -297,8 +383,22 @@ this.setState({loading: false});
             <Button onClick={()=>this.setState({ EndDate:"", EndDateCalendar:""})}>Clear</Button> <Button onClick={closeEndDateModal}>Close</Button>
           </Modal.Footer>
         </Modal>
+        <InputGroup.Addon>
+        <FormControl onChange={this._onChange} id="EndTime" placeholder="Time (24H)" disabled={this.state.EndTime}
+                    value={this.state.EndTime} disabled={this.state.EndTimeDisabled}
+                    name="EndTime" ref="EndTime" type="text" />
+        </InputGroup.Addon>
+        <InputGroup.Addon>
+        <Checkbox checked={this.state.EndDateCheckToday} disabled={this.state.EndDateCheckTodayDisabled} onClick={this.checkTodayChanged} name="EndDate">
+            Today
+        </Checkbox>
+        <Checkbox onClick={this.checkNowChanged} name="EndTime" >
+            Now
+        </Checkbox>
         </InputGroup.Addon>
       </InputGroup>
+                    <span className="help-block">{this.state.errors.EndDate}</span>
+                    <span className="help-block">{this.state.errors.EndTime}</span>
                 </Col> 
           </FormGroup>
 
@@ -306,13 +406,13 @@ this.setState({loading: false});
 
         <FormGroup>
                 <Col componentClass={ControlLabel} xs={2} xsOffset={2}>
-                    Comment
+                    Comments
                 </Col>
-                <Col xs={4}>
+                <Col xs={5}>
          
-            <FormControl onChange={this._onChange} id="Comment" placeholder="Comment" 
-                    value={this.state.Comment} componentClass="textarea" 
-                    name="Comment" ref="Comment" />
+            <FormControl onChange={this._onChange} id="Comments" placeholder="Comments" 
+                    value={this.state.Comments} componentClass="textarea" 
+                    name="Comments" ref="Comments" />
                 </Col> 
           </FormGroup>
 
@@ -333,6 +433,13 @@ this.setState({loading: false});
         
      </div>
     );
+
   }
+
+
+
 }
+
+var DateRegex = "^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
+var TimeRegex = "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$";
 export default TimeRecordNew;

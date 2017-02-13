@@ -59,7 +59,7 @@ delete(item){
     if (!this.state.apiData) {
         return <p>Loading</p>
     }  
-
+debugger;
     var moment = require('moment')
     return (
         <div>
@@ -85,13 +85,12 @@ delete(item){
                         </thead>
                         <tbody>
                             {this.state.apiData.map((TimeRecord) => {
-                                return 
-                                    <tr key={TimeRecord.TimeRecordID}>
+                                return <tr key={TimeRecord.TimeRecordID}>
                                         <td>{TimeRecord.UserName}</td>
                                         <td>{TimeRecord.ProjectName}</td>
-                                        <td>{moment(TimeRecord.Start).format('DD/MM/YYYY')}</td>
-                                        <td>{moment(TimeRecord.End).format('DD/MM/YYYY')}</td>
-                                        <td>{TimeRecord.Comment}</td>
+                                        <td>{moment(TimeRecord.Start).format('DD/MM/YYYY HH:mm')}</td>
+                                        <td>{moment(TimeRecord.End).format('DD/MM/YYYY HH:mm')}</td>
+                                        <td>{TimeRecord.Comments}</td>
                                         <td>
                                             <ButtonGroup  bsSize="small">
                                                 <Button bsStyle="primary"><Link to={("TimeRecordEdit/"+TimeRecord.TimeRecordID)} style={{color:"white", textDecoration: 'none'}}>Edit</Link></Button>
