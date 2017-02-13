@@ -26,6 +26,7 @@ class App extends Component {
         <NavItem eventKey={2} href="#"><Link to="project"><b>Projects</b></Link></NavItem>
         <NavItem eventKey={3} href="#"><Link to="user"><b>Users</b></Link></NavItem>
         <NavItem eventKey={4} href="#"><Link to="timerecord"><b>Time Records</b></Link></NavItem>
+        <NavItem eventKey={4} href="#"><Link to="costreport"><b>Cost Report</b></Link></NavItem>
       </Nav>
     </Navbar.Collapse>
   </Navbar> 

@@ -14,6 +14,7 @@ import UserEdit from './pages/UserEdit.js';
 import TimeRecord from './pages/TimeRecord.js';
 import TimeRecordNew from './pages/TimeRecordNew.js';
 import TimeRecordEdit from './pages/TimeRecordEdit.js';
+import CostReport from './pages/CostReport.js';
 
   const app = document.getElementById('root');
 ReactDOM.render(
@@ -31,6 +32,8 @@ ReactDOM.render(
     <Route path="timerecord" component={TimeRecord}></Route>
     <Route path="timerecordNew" component={TimeRecordNew}></Route>
     <Route path="timerecordEdit/:id" component={TimeRecordEdit}></Route>
+    <Route path="costreport" component={CostReport}></Route> 
+    <Route path="costreport/:id" component={CostReport}></Route>
   </Route>
 </Router>
   , app);
